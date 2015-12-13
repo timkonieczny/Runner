@@ -1,13 +1,11 @@
 package com.timkonieczny.runner;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +19,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private static Context context;
 
     public Renderer(Context context) {
-        this.context = context;
+        Renderer.context = context;
     }
 
     private Cube mCube;
@@ -35,7 +33,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
@@ -65,20 +62,18 @@ public class Renderer implements GLSurfaceView.Renderer {
                 0f, 0f, 0f,
                 0f, 1.0f, 0.0f);
 
-        // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
         // Create a rotation transformation for the triangle
         long time = SystemClock.uptimeMillis() % 4000L;
         float angle = 0.090f * ((int) time);
-        Matrix.setRotateM(mRotationMatrix, 0, angle, 0.0f, 1.0f, 0.0f);
+        Matrix.setRotateM(mRotationMatrix, 0, angle, 1.0f, 1.0f, 1.0f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mRotationMatrix, 0);
 
-        mCube.draw(scratch);
+
+        mCube.draw(scratch, mProjectionMatrix);
     }
 
     public static int loadShader(int type, String fileName) {
