@@ -10,7 +10,7 @@ public class Matrix3 {
 		};
 	}
 
-	public static float[] transpose(float[] matrix3, float[] out){
+	public static void transpose(float[] matrix3, float[] out){
 
 		out[0] = matrix3[0];
 		out[1] = matrix3[3];
@@ -23,7 +23,5 @@ public class Matrix3 {
 		out[6] = matrix3[2];
 		out[7] = matrix3[5];
 		out[8] = matrix3[8];
-
-		return out;
 	}
 }

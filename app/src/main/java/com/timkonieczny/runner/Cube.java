@@ -1,6 +1,7 @@
 package com.timkonieczny.runner;
 
 import android.opengl.GLES31;
+import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,6 +9,9 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class Cube {
+    public float zPosition;
+    public float zScale;
+
     private FloatBuffer vertexBuffer;
     private FloatBuffer colorBuffer;
     private FloatBuffer normalBuffer;
@@ -197,7 +201,7 @@ public class Cube {
         normalMatrix.setValues(Matrix3.fromMatrix4(viewMatrix));
         normalMatrix.invert(normalMatrix);
         normalMatrix.getValues(mInvertedNMatrix);
-        mTransposedNMatrix = Matrix3.transpose(mInvertedNMatrix, mTransposedNMatrix);
+        Matrix3.transpose(mInvertedNMatrix, mTransposedNMatrix);
 
         GLES31.glUniformMatrix3fv(mNormalMatrixLocation, 1, false, mTransposedNMatrix, 0);
 
@@ -221,5 +225,22 @@ public class Cube {
                 drawOrder.length,
                 GLES31.GL_UNSIGNED_SHORT,
                 drawListBuffer);
+    }
+
+    public void refresh(float farClippingPlane){
+        zScale = 1.0f + (float)Math.random() * 4.0f;
+        zPosition = farClippingPlane + zScale / 2.0f;
+    }
+
+    public void update(float[] modelMatrix, float farClippingPlane, float ratio, float delta){
+        Matrix4.identity(modelMatrix);
+        if(zPosition < -zScale / 2){
+            zPosition = (farClippingPlane + zScale / 2);
+            refresh(farClippingPlane);
+        }else{
+            zPosition -= delta / 1000;
+        }
+        Matrix.translateM(modelMatrix, 0, 0.0f, -1.5f, zPosition);       // Scale scales translation values too
+        Matrix.scaleM(modelMatrix, 0, ratio * 2f, 1.0f, zScale);
     }
 }

@@ -22,58 +22,68 @@ public class Renderer implements GLSurfaceView.Renderer {
         Renderer.context = context;
     }
 
-    private Cube mCube;
+    private Cube[] mCubes;
 
     @Override
     public void onSurfaceCreated(GL10 unused, javax.microedition.khronos.egl.EGLConfig config) {
         // Set the background frame colors
-        GLES31.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        mCube = new Cube();
+        mCubes = new Cube[]{
+                new Cube(),
+                new Cube()
+        };
     }
 
-    // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
+
+    private float ratio;
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES31.glViewport(0, 0, width, height);
 
-        float ratio = (float) width / height;
+        ratio = (float) width / height;
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 2, 4);	// z clipping starts at -1 and 1
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 1.0f, 4);	// z clipping starts at 0 and 3
+        farClippingPlane = 3.0f;
+        mCubes[0].refresh(farClippingPlane);
 
     }
 
-    private float[] mRotationMatrix = new float[16];
+    private float[] mModelMatrix = new float[16];
+    private long timeDelta = SystemClock.uptimeMillis();
+    private long lastFrame = SystemClock.uptimeMillis();
+    private float farClippingPlane;
 
     public void onDrawFrame(GL10 unused) {
+
+        timeDelta = SystemClock.uptimeMillis() - lastFrame;
+        lastFrame = SystemClock.uptimeMillis();
+
         float[] scratch = new float[16];
+        mModelMatrix = new float[16];
 
         // Redraw background colors
         GLES31.glClear(GLES31.GL_COLOR_BUFFER_BIT);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0,
-                0, 0, -3,
+                0, 0, -1.0f,
                 0f, 0f, 0f,
                 0f, 1.0f, 0.0f);
 
-        // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 4000L;
-        float angle = 0.090f * ((int) time);
-        Matrix.setRotateM(mRotationMatrix, 0, angle, 1.0f, 1.0f, 1.0f);
+        mCubes[0].update(mModelMatrix, farClippingPlane, ratio, timeDelta);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
 
-
-        mCube.draw(scratch, mProjectionMatrix);
+        mCubes[0].draw(scratch, mProjectionMatrix);
     }
 
     public static int loadShader(int type, String fileName) {
