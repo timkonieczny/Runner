@@ -62,7 +62,18 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     public static boolean[] IS_LANE_FREE = new boolean[]{true, true, true};
 
+    private float mPlayerYPos = 0.0f;
+
     public void onDrawFrame(GL10 unused) {
+
+        if(RenderingView.CLICKED){
+            RenderingView.CLICKED = false;
+            if(mPlayerYPos>0.0f){
+                mPlayerYPos = 0.0f;
+            }else{
+                mPlayerYPos = 0.2f;
+            }
+        }
 
         timeDelta = SystemClock.uptimeMillis() - lastFrame;
         lastFrame = SystemClock.uptimeMillis();
@@ -75,8 +86,8 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0,
-                0, 0, -1.0f,
-                0f, 0f, 0f,
+                0, mPlayerYPos, -1.0f,
+                0f, mPlayerYPos, 0f,
                 0f, 1.0f, 0.0f);
 
         for (Cube cube:mCubes) {
