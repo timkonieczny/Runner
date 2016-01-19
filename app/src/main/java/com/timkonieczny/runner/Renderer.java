@@ -80,7 +80,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                 0f, 1.0f, 0.0f);
 
         for (Cube cube:mCubes) {
-            cube.update(mModelMatrix, farClippingPlane, ratio, timeDelta);
+            cube.update(mModelMatrix, farClippingPlane, timeDelta);
 
             // Combine the rotation matrix with the projection and camera view
             // Note that the mMVPMatrix factor *must be first* in order

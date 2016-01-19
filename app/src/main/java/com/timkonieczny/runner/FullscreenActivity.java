@@ -3,6 +3,7 @@ package com.timkonieczny.runner;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 
 public class FullscreenActivity extends Activity {
 
@@ -20,6 +21,7 @@ public class FullscreenActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mGLView = new RenderingView(this);
         setContentView(mGLView);
