@@ -30,8 +30,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         mCubes = new Cube[]{
-                new Cube(),
-                new Cube()
+                new Cube(-1.0f),
+                new Cube(1.0f),
+                new Cube(0.0f)
         };
     }
 
@@ -51,13 +52,15 @@ public class Renderer implements GLSurfaceView.Renderer {
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 1.0f, 4);	// z clipping starts at 0 and 3
         farClippingPlane = 3.0f;
         mCubes[0].refresh(farClippingPlane);
-
+        mCubes[1].refresh(farClippingPlane);
     }
 
     private float[] mModelMatrix = new float[16];
     private long timeDelta = SystemClock.uptimeMillis();
     private long lastFrame = SystemClock.uptimeMillis();
     private float farClippingPlane;
+
+    public static boolean[] IS_LANE_FREE = new boolean[]{true, true, true};
 
     public void onDrawFrame(GL10 unused) {
 
@@ -76,14 +79,16 @@ public class Renderer implements GLSurfaceView.Renderer {
                 0f, 0f, 0f,
                 0f, 1.0f, 0.0f);
 
-        mCubes[0].update(mModelMatrix, farClippingPlane, ratio, timeDelta);
+        for (Cube cube:mCubes) {
+            cube.update(mModelMatrix, farClippingPlane, ratio, timeDelta);
 
-        // Combine the rotation matrix with the projection and camera view
-        // Note that the mMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
+            // Combine the rotation matrix with the projection and camera view
+            // Note that the mMVPMatrix factor *must be first* in order
+            // for the matrix multiplication product to be correct.
+            Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
 
-        mCubes[0].draw(scratch, mProjectionMatrix);
+            cube.draw(scratch, mProjectionMatrix);
+        }
     }
 
     public static int loadShader(int type, String fileName) {

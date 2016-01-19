@@ -126,8 +126,10 @@ public class Cube {
     };
 
     private final int mProgram;
+    private final float mXShift;
 
-    public Cube() {
+    public Cube(float xShift) {
+        this.mXShift = xShift;
 
         // Initialize buffers
 
@@ -230,17 +232,37 @@ public class Cube {
     public void refresh(float farClippingPlane){
         zScale = 1.0f + (float)Math.random() * 4.0f;
         zPosition = farClippingPlane + zScale / 2.0f;
+        mLane = (int)Math.floor(Math.random() * 3.0);
     }
 
-    public void update(float[] modelMatrix, float farClippingPlane, float ratio, float delta){
-        Matrix4.identity(modelMatrix);
-        if(zPosition < -zScale / 2){
-            zPosition = (farClippingPlane + zScale / 2);
-            refresh(farClippingPlane);
-        }else{
-            zPosition -= delta / 1000;
+    private int mLane;
+    public int delay = 0;
+    private boolean mRendering = false;
+
+    public void update(float[] modelMatrix, float farClippingPlane, float delta){
+        if(mRendering){
+            Matrix4.identity(modelMatrix);
+            Matrix.translateM(modelMatrix, 0, mXShift, -1.5f, zPosition);       // Scale scales translation values too
+            Matrix.scaleM(modelMatrix, 0, 1.0f, 1.0f, zScale);
+            if (zPosition < -zScale / 2) {
+                delay = (int)Math.floor(Math.random()*1000.0);
+                mRendering = false;
+                Renderer.IS_LANE_FREE[mLane] = true;
+            } else {
+                zPosition -= delta / 1000;
+            }
+        }else {
+            if (delay <= 0) {
+                refresh(farClippingPlane);
+                if (Renderer.IS_LANE_FREE[mLane]) {
+                    mRendering = true;
+                    Renderer.IS_LANE_FREE[mLane] = false;
+                } else {
+                    delay += 1000;
+                }
+            } else {
+                delay -= delta;
+            }
         }
-        Matrix.translateM(modelMatrix, 0, 0.0f, -1.5f, zPosition);       // Scale scales translation values too
-        Matrix.scaleM(modelMatrix, 0, ratio * 2f, 1.0f, zScale);
     }
 }
