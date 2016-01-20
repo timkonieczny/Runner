@@ -26,5 +26,13 @@ public class RenderingView extends GLSurfaceView {
         }
     };
 
-    public static boolean CLICKED = false;
+    public static boolean GET_CLICK_STATUS(){
+        if(CLICKED){
+            CLICKED = false;
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean CLICKED = false;
 }

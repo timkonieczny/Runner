@@ -6,6 +6,7 @@ import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,19 +65,28 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private float mPlayerYPos = 0.0f;
 
-    public void onDrawFrame(GL10 unused) {
+    private boolean mPlayerJumping = false;
+    private float mJumpingAnimTime = 0.0f;
+    private float mJumpingAnimDuration = 1000.0f;
 
-        if(RenderingView.CLICKED){
-            RenderingView.CLICKED = false;
-            if(mPlayerYPos>0.0f){
-                mPlayerYPos = 0.0f;
-            }else{
-                mPlayerYPos = 0.2f;
-            }
-        }
+    public void onDrawFrame(GL10 unused) {
 
         timeDelta = SystemClock.uptimeMillis() - lastFrame;
         lastFrame = SystemClock.uptimeMillis();
+
+        if(RenderingView.GET_CLICK_STATUS() && !mPlayerJumping){
+            mPlayerJumping = true;
+        }
+
+        if(mPlayerJumping){
+            mJumpingAnimTime += timeDelta;
+            mPlayerYPos = (float)Math.sin((mJumpingAnimTime / mJumpingAnimDuration) * Math.PI);
+            if(mPlayerYPos <= 0.0f){
+                mPlayerYPos = 0.0f;
+                mPlayerJumping = false;
+                mJumpingAnimTime = 0.0f;
+            }
+        }
 
         float[] scratch = new float[16];
         mModelMatrix = new float[16];
