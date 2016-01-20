@@ -3,6 +3,7 @@ package com.timkonieczny.runner;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class RenderingView extends GLSurfaceView {
@@ -14,25 +15,31 @@ public class RenderingView extends GLSurfaceView {
 
         setRenderer(new com.timkonieczny.runner.Renderer(this.getContext()));
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        setOnClickListener(mOnClickListener);
     }
 
-    private OnClickListener mOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Log.d("RenderingView", "Click");
-            CLICKED = true;
-        }
-    };
+    private float mDownX;
+    private float mDownY;
 
-    public static boolean GET_CLICK_STATUS(){
-        if(CLICKED){
-            CLICKED = false;
+    public static int SWIPE_UP = 0;
+    public static int SWIPE_LEFT = 1;
+    public static int SWIPE_RIGHT = 2;
+    public static int SWIPE_DOWN = 3;
+
+    public static int CURRENT_SWIPE = 3;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e){
+        int action = e.getAction();
+        if(action == MotionEvent.ACTION_DOWN){
+            mDownX = e.getX();
+            mDownY = e.getY();
+        }else if(action == MotionEvent.ACTION_UP){
+            if(mDownY - e.getY() < 0){  // swipe down
+                CURRENT_SWIPE = SWIPE_DOWN;
+            }else{
+                CURRENT_SWIPE = SWIPE_UP; // TODO: Implement left / right
+            }
+        }
             return true;
-        }
-        return false;
     }
-
-    private static boolean CLICKED = false;
 }

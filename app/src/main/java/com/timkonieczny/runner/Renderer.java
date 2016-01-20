@@ -74,8 +74,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         timeDelta = SystemClock.uptimeMillis() - lastFrame;
         lastFrame = SystemClock.uptimeMillis();
 
-        if(RenderingView.GET_CLICK_STATUS() && !mPlayerJumping){
+        if(RenderingView.CURRENT_SWIPE == RenderingView.SWIPE_UP && !mPlayerJumping){
             mPlayerJumping = true;
+            RenderingView.CURRENT_SWIPE = RenderingView.SWIPE_DOWN; // assign invalid value
         }
 
         if(mPlayerJumping){
