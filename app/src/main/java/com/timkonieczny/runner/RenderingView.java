@@ -37,7 +37,16 @@ public class RenderingView extends GLSurfaceView {
             if(mDownY - e.getY() < 0){  // swipe down
                 CURRENT_SWIPE = SWIPE_DOWN;
             }else{
-                CURRENT_SWIPE = SWIPE_UP; // TODO: Implement left / right
+                if(mDownX - e.getX() < -getWidth() / 3){
+                    Log.d("RenderingView", "SWIPE_RIGHT");
+                    CURRENT_SWIPE = SWIPE_RIGHT;
+                }else if(mDownX - e.getX() > getWidth() / 3){
+                    Log.d("RenderingView", "SWIPE_LEFT");
+                    CURRENT_SWIPE = SWIPE_LEFT;
+                }else{
+                    Log.d("RenderingView", "SWIPE_UP");
+                    CURRENT_SWIPE = SWIPE_UP;
+                }
             }
         }
             return true;
