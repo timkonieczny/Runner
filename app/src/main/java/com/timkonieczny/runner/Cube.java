@@ -243,7 +243,7 @@ public class Cube {
         if(mRendering){
             Matrix4.identity(modelMatrix);
             Matrix.translateM(modelMatrix, 0, mXShift, -1.5f, zPosition);       // Scale scales translation values too
-            Matrix.scaleM(modelMatrix, 0, 1.0f, 1.0f, zScale);
+            Matrix.scaleM(modelMatrix, 0, 0.8f, 1.0f, zScale);
             if (zPosition < -zScale / 2) {
                 delay = (int)Math.floor(Math.random()*1000.0);
                 mRendering = false;
