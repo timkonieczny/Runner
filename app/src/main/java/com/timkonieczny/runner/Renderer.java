@@ -79,12 +79,12 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         if(RenderingView.CURRENT_SWIPE != RenderingView.SWIPE_DOWN && !mPlayerJumping){
             mPlayerJumping = true;
-            if(RenderingView.CURRENT_SWIPE == RenderingView.SWIPE_LEFT){
-                mPlayerOnLane--;
-            }else if(RenderingView.CURRENT_SWIPE == RenderingView.SWIPE_RIGHT){
+            mJumpingDirection = RenderingView.CURRENT_SWIPE;
+            if(mJumpingDirection == RenderingView.SWIPE_LEFT){
+                mPlayerOnLane--;    // TODO: Change after 50% of jumping animation are over
+            }else if(mJumpingDirection == RenderingView.SWIPE_RIGHT){
                 mPlayerOnLane++;
             }
-            mJumpingDirection = RenderingView.CURRENT_SWIPE;
             Log.d("Renderer", mPlayerOnLane+"");
             RenderingView.CURRENT_SWIPE = RenderingView.SWIPE_DOWN; // assign invalid value
         }
@@ -93,9 +93,9 @@ public class Renderer implements GLSurfaceView.Renderer {
             mJumpingAnimTime += timeDelta;
             mPlayerYPos = (float)Math.sin((mJumpingAnimTime / mJumpingAnimDuration) * Math.PI);
             if(mJumpingDirection == RenderingView.SWIPE_LEFT){
-                mPlayerXPos += timeDelta / mJumpingAnimDuration;    // TODO: multiply by right distance between cubes
+                mPlayerXPos -= timeDelta / mJumpingAnimDuration;    // TODO: multiply by right distance between cubes
             }else if(mJumpingDirection == RenderingView.SWIPE_RIGHT){
-                mPlayerXPos -= timeDelta / mJumpingAnimDuration;
+                mPlayerXPos += timeDelta / mJumpingAnimDuration;
             }
             if(mPlayerYPos <= 0.0f){    // landed
                 mPlayerYPos = 0.0f;
@@ -112,24 +112,24 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0,
-                mPlayerXPos, mPlayerYPos, -1.0f,    // TODO: Camera looking backwards
+                mPlayerXPos, mPlayerYPos, 1.0f,
                 mPlayerXPos, mPlayerYPos, 0f,
                 0f, 1.0f, 0.0f);
 
         switch (mPlayerOnLane){
             case 0:     // left lane
                 Log.d("Renderer", "Left Lane");
-                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
+                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[0].draw(scratch, mProjectionMatrix);
+                mCubes[2].draw(scratch, mProjectionMatrix);
 
                 mCubes[1].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
                 mCubes[1].draw(scratch, mProjectionMatrix);
 
-                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
+                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[2].draw(scratch, mProjectionMatrix);
+                mCubes[0].draw(scratch, mProjectionMatrix);
                 break;
             case 1:     // middle lane
                 Log.d("Renderer", "Center Lane");
@@ -147,20 +147,19 @@ public class Renderer implements GLSurfaceView.Renderer {
                 break;
             case 2:     // right lane
                 Log.d("Renderer", "Right Lane");
-                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
+                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[2].draw(scratch, mProjectionMatrix);
+                mCubes[0].draw(scratch, mProjectionMatrix);
 
                 mCubes[1].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
                 mCubes[1].draw(scratch, mProjectionMatrix);
 
-                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
+                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
                 Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[0].draw(scratch, mProjectionMatrix);
+                mCubes[2].draw(scratch, mProjectionMatrix);
                 break;
         }
-
     }
 
     private int mPlayerOnLane = 1;

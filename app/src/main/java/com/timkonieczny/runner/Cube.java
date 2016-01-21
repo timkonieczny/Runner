@@ -231,7 +231,7 @@ public class Cube {
 
     public void refresh(float farClippingPlane){
         zScale = 1.0f + (float)Math.random() * 4.0f;
-        zPosition = farClippingPlane + zScale / 2.0f;
+        zPosition = -farClippingPlane - zScale / 2.0f;
         mLane = (int)Math.floor(Math.random() * 3.0);
     }
 
@@ -244,12 +244,12 @@ public class Cube {
             Matrix4.identity(modelMatrix);
             Matrix.translateM(modelMatrix, 0, mXShift, -1.5f, zPosition);       // Scale scales translation values too
             Matrix.scaleM(modelMatrix, 0, 0.8f, 1.0f, zScale);
-            if (zPosition < -zScale / 2) {
+            if (zPosition > zScale / 2) {
                 delay = (int)Math.floor(Math.random()*1000.0);
                 mRendering = false;
                 Renderer.IS_LANE_FREE[mLane] = true;
             } else {
-                zPosition -= delta / 1000;
+                zPosition += delta / 1000;
             }
         }else {
             if (delay <= 0) {
