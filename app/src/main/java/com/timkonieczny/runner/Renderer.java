@@ -6,7 +6,6 @@ import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,13 +39,11 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
-    private float ratio;
-
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES31.glViewport(0, 0, width, height);
 
-        ratio = (float) width / height;
+        float ratio = (float) width / height;
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
@@ -68,9 +65,10 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private boolean mPlayerJumping = false;
     private float mJumpingAnimTime = 0.0f;
-    private float mJumpingAnimDuration = 1000.0f;
+    private final float mJumpingAnimDuration = 1000.0f;
 
     private int mJumpingDirection = RenderingView.SWIPE_DOWN;
+    private boolean mDrawOrderSet = false;
 
     public void onDrawFrame(GL10 unused) {
 
@@ -80,13 +78,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         if(RenderingView.CURRENT_SWIPE != RenderingView.SWIPE_DOWN && !mPlayerJumping){
             mPlayerJumping = true;
             mJumpingDirection = RenderingView.CURRENT_SWIPE;
-            if(mJumpingDirection == RenderingView.SWIPE_LEFT){
-                mPlayerOnLane--;    // TODO: Change after 50% of jumping animation are over
-            }else if(mJumpingDirection == RenderingView.SWIPE_RIGHT){
-                mPlayerOnLane++;
-            }
-            Log.d("Renderer", mPlayerOnLane+"");
             RenderingView.CURRENT_SWIPE = RenderingView.SWIPE_DOWN; // assign invalid value
+            mDrawOrderSet = false;
         }
 
         if(mPlayerJumping){
@@ -96,6 +89,14 @@ public class Renderer implements GLSurfaceView.Renderer {
                 mPlayerXPos -= timeDelta / mJumpingAnimDuration;    // TODO: multiply by right distance between cubes
             }else if(mJumpingDirection == RenderingView.SWIPE_RIGHT){
                 mPlayerXPos += timeDelta / mJumpingAnimDuration;
+            }
+            if(mJumpingAnimTime / mJumpingAnimDuration >= 0.5f && !mDrawOrderSet){  // Change draw order to new lane
+                if(mJumpingDirection == RenderingView.SWIPE_LEFT){
+                    mPlayerOnLane--;
+                }else if(mJumpingDirection == RenderingView.SWIPE_RIGHT){
+                    mPlayerOnLane++;
+                }
+                mDrawOrderSet = true;
             }
             if(mPlayerYPos <= 0.0f){    // landed
                 mPlayerYPos = 0.0f;
@@ -118,48 +119,27 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         switch (mPlayerOnLane){
             case 0:     // left lane
-                Log.d("Renderer", "Left Lane");
-                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[2].draw(scratch, mProjectionMatrix);
-
-                mCubes[1].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[1].draw(scratch, mProjectionMatrix);
-
-                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[0].draw(scratch, mProjectionMatrix);
+                updateAndDrawCube(mCubes[2], scratch);
+                updateAndDrawCube(mCubes[1], scratch);
+                updateAndDrawCube(mCubes[0], scratch);
                 break;
             case 1:     // middle lane
-                Log.d("Renderer", "Center Lane");
-                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[0].draw(scratch, mProjectionMatrix);
-
-                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[2].draw(scratch, mProjectionMatrix);
-
-                mCubes[1].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[1].draw(scratch, mProjectionMatrix);
+                updateAndDrawCube(mCubes[0], scratch);
+                updateAndDrawCube(mCubes[2], scratch);
+                updateAndDrawCube(mCubes[1], scratch);
                 break;
             case 2:     // right lane
-                Log.d("Renderer", "Right Lane");
-                mCubes[0].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[0].draw(scratch, mProjectionMatrix);
-
-                mCubes[1].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[1].draw(scratch, mProjectionMatrix);
-
-                mCubes[2].update(mModelMatrix, farClippingPlane, timeDelta);
-                Matrix.multiplyMM(scratch, 0, mViewMatrix, 0, mModelMatrix, 0);
-                mCubes[2].draw(scratch, mProjectionMatrix);
+                updateAndDrawCube(mCubes[0], scratch);
+                updateAndDrawCube(mCubes[1], scratch);
+                updateAndDrawCube(mCubes[2], scratch);
                 break;
         }
+    }
+
+    private void updateAndDrawCube(Cube cube, float[] mvMatrix) {
+        cube.update(mModelMatrix, farClippingPlane, timeDelta);
+        Matrix.multiplyMM(mvMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        cube.draw(mvMatrix, mProjectionMatrix);
     }
 
     private int mPlayerOnLane = 1;

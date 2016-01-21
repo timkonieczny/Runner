@@ -2,9 +2,7 @@ package com.timkonieczny.runner;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 
 public class RenderingView extends GLSurfaceView {
 
@@ -38,13 +36,10 @@ public class RenderingView extends GLSurfaceView {
                 CURRENT_SWIPE = SWIPE_DOWN;
             }else{
                 if(mDownX - e.getX() < -getWidth() / 3){
-                    Log.d("RenderingView", "SWIPE_RIGHT");
                     CURRENT_SWIPE = SWIPE_RIGHT;
                 }else if(mDownX - e.getX() > getWidth() / 3){
-                    Log.d("RenderingView", "SWIPE_LEFT");
                     CURRENT_SWIPE = SWIPE_LEFT;
                 }else{
-                    Log.d("RenderingView", "SWIPE_UP");
                     CURRENT_SWIPE = SWIPE_UP;
                 }
             }
